@@ -1,72 +1,171 @@
-// Grab the articles as a json
-$.getJSON("/articles", function(data) {
-  // For each one
-  for (var i = 0; i < data.length; i++) {
-    // Display the apropos information on the page
-    $("#articles").append("<p data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].link + "</p>");
-  }
-});
+$(document).on("click", ".save", function() {
 
+  var thisId = $(this).attr("id");
 
-// Whenever someone clicks a p tag
-$(document).on("click", "p", function() {
-  // Empty the notes from the note section
-  $("#notes").empty();
-  // Save the id from the p tag
-  var thisId = $(this).attr("data-id");
-
-  // Now make an ajax call for the Article
   $.ajax({
-    method: "GET",
-    url: "/articles/" + thisId
-  })
-    // With that done, add the note information to the page
-    .then(function(data) {
-      console.log(data);
-      // The title of the article
-      $("#notes").append("<h2>" + data.title + "</h2>");
-      // An input to enter a new title
-      $("#notes").append("<input id='titleinput' name='title' >");
-      // A textarea to add a new note body
-      $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
-      // A button to submit a new note, with the id of the article saved to it
-      $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
-
-      // If there's a note in the article
-      if (data.note) {
-        // Place the title of the note in the title input
-        $("#titleinput").val(data.note.title);
-        // Place the body of the note in the body textarea
-        $("#bodyinput").val(data.note.body);
-      }
-    });
-});
-
-// When you click the savenote button
-$(document).on("click", "#savenote", function() {
-  // Grab the id associated with the article from the submit button
-  var thisId = $(this).attr("data-id");
-
-  // Run a POST request to change the note, using what's entered in the inputs
-  $.ajax({
-    method: "POST",
-    url: "/articles/" + thisId,
+    method: "PUT",
+    url: "/api/articles/" + thisId,
     data: {
-      // Value taken from title input
-      title: $("#titleinput").val(),
-      // Value taken from note textarea
-      body: $("#bodyinput").val()
+      id: $(this).attr("id"),
+      saved: $(this).attr("saved")
     }
   })
-    // With that done
     .then(function(data) {
-      // Log the response
       console.log(data);
-      // Empty the notes section
-      $("#notes").empty();
+    });
+});
+
+$(document).on("click", ".read", function() {
+});
+
+$(document).on("click", ".note", function() {
+
+  var thisId = $(this).attr("id");
+  $(".submitNote").attr("note-id", thisId)
+
+  $.ajax({
+    method: "GET",
+    url: "/api/articles/" + thisId
+  })
+    .then(function(data) {
+      createModal(data)
+    });
+});
+
+$(document).on("click", ".submitNote", function() {
+  event.preventDefault()
+  console.log("this works")
+
+  var thisId = $(this).attr("note-id");
+  console.log("*-*-*-*-")
+  console.log(thisId)
+  console.log("*-*-*-*-")  
+
+  $.ajax({
+    method: "POST",
+    url: "/api/articles/" + thisId,
+    data: {
+      title: $(".noteTitle").val(),
+      body: $(".articleNote").val()
+    }
+  })
+    .then(function(data) {
+      $("#notes").hide()
+      $(".noteTitle").val("")
+      $(".articleNote").val("")
     });
 
-  // Also, remove the values entered in the input and textarea for note entry
-  $("#titleinput").val("");
-  $("#bodyinput").val("");
 });
+
+
+function createCard(data) {
+
+  for (let i = 0; i < data.length; i++) {  
+
+      let thediv = $("<div>")
+        .addClass("card w-100 m-3 p-3")
+        .addClass("theCard")
+        .addClass("align-top")
+        .attr("style", "width: 18rem;")
+        .attr("id", "cardBody")
+
+      let divBody = $("<div>").addClass("card-body");
+
+      let theTitle = $("<p>")
+        .addClass("card-text")
+        .html(`<h2>${data[i].title}</h2>`)
+
+      let theBody = $("<p>")
+        .addClass("card-text")
+        .html(data[i].blurb ? `${data[i].blurb}` : `<p>Sorry - No Summary Available</p> `)
+
+      var saveBtn = $("<button>")
+        .attr("id", data[i]._id)
+        .attr("saved", data[i].saved)
+        .addClass("save")
+        .addClass("btn btn-warning")
+        .addClass("btn-sm")
+        .html(data[i].saved ? " Remove Article " :  " Save Article ")
+    
+      var noteBtn = $("<button>")
+        .attr("id", data[i]._id)
+        .addClass("note")
+        .addClass("btn btn-warning")
+        .addClass("btn-sm")
+        .html(" Create Note ")
+ 
+      let applySave = $("<td class='align-middle'>").html(saveBtn);
+      let applyNote = $("<td class='align-middle'>").html(noteBtn);
+      
+      thediv.append(divBody);
+      // thediv.append(theImg);
+      thediv.append(theTitle);
+      thediv.append(theBody);
+      thediv.append(applySave);
+      thediv.append(applyNote);
+      $(".articles").append(thediv)
+      }   
+  };
+  
+
+
+function createModal(project) {
+  console.log(project)
+
+  $("#project-modal").remove()
+
+      let modal = $("<div>").addClass("modal fade")
+          .attr("id" , "project-modal")
+          .attr("tabindex", "-1")
+          .attr("role", "dialog")
+          .attr("aria-labelledby", "exampleModalCenterTitle")
+          .attr("aria-hidden", "true")
+      let modalDialog = $("<div>").addClass("modal-dialog modal-dialog-centered")
+          .attr("role", "document")
+      let modalContent = $("<div>").addClass("modal-content")
+      let modalHeader = $("<div>").addClass("modal-header theModal")
+          .html(`<h5 class="modal-title" id="exampleModalLongTitle">${project.title}</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                      </button>`)
+      let modalBody = $("<div>").addClass("modal-body")
+
+      // let modalImage = $("<img>")
+      //                 .attr("src", portfolio[project].image)
+      //                 .addClass("img-fluid")
+      //                 .attr("alt", "Responsive image")
+      //                 .appendTo(modalBody)
+
+      let modalText = $("<div>").html(`<br>${project.blurb}<br><br>
+                      Read the full article, <a href="${project.link}" target="blank">click here</a>.<br><br>
+                      `)
+                      .appendTo(modalBody)
+
+      let modalForm = $("<div>").addClass("form-group")
+                      .html(`<label>Note Title</label><br>
+                      <input class="form-control noteTitle" type="text"><br>
+                      <label>Your Thoughts</label><br>
+                      <textarea class="form-control articleNote" rows="3"></textarea><br>
+                      `)
+                      .appendTo(modalBody)
+                      
+      let modalFooter = $("<div>").addClass("modal-footer theModal")
+          .html(`
+          <button type="button" class="btn btn-secondary submitNote" data-dismiss="modal" note-id=${project._id}>Submit</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          `)
+       
+      modalContent.append(modalHeader)
+      modalContent.append(modalBody)
+      modalContent.append(modalFooter)
+      modalDialog.append(modalContent)
+      modal.append(modalDialog)
+      $("body").append(modal)
+
+      if (project.note) {
+        $(".noteTitle").val(project.note.title);
+        $(".articleNote").val(project.note.body);
+      }
+
+      $("#project-modal").modal('show')
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {{!-- google font --}}
+    <link href="https://fonts.googleapis.com/css?family=Chivo&display=swap" rel="stylesheet">
+
+    <!-- jQuery CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="styles/style.css">
+    <title>Gamespot, but less?</title>
+  </head>
+  <body>    
+    
+    <div class="parallax">
+
+      <div class="container">
+
+      <div class="jumbotron text-center" id="jumbo">
+          <h1 class="main-title">Gamespot, but less?</h1>
+          <hr class="my-4">
+          <a class="text-center theCard ml-2 mr-2 btn btn-danger" href="/scrape">Get Articles</a>
+          <a class="text-center theCard ml-2 mr-2 btn btn-danger" href="/saved">Saved Articles</a>
+      </div>
+
+      {{{body}}}
+    </div>
+
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
